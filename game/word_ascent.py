@@ -5,6 +5,7 @@ import threading
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse
+import re
 
 data = np.load("artefacts/filtered_embeddings.npz")
 W = data["W"]
@@ -16,6 +17,7 @@ with open("artefacts/filtered_idx_word.json", "r") as f:
     idx_word = json.load(f)
 
 idx_word = {int(k): v for k, v in idx_word.items()}
+
 
 game_state = {
     "target": None, "target_id": None, "target_vec": None,
@@ -59,6 +61,7 @@ def init_game(W, word_idx, idx_word, max_steps=10, target=None):
         "opening_hint": opening_hint
     })
 
+
 def process_guess(guess):
     gs = game_state
     if gs["status"] != "playing":
@@ -66,6 +69,13 @@ def process_guess(guess):
     guess = guess.strip().lower()
     if guess not in gs["word_idx"]:
         return {"error": "Word not in vocabulary."}
+    
+    guessed_words = {g["word"] for g in gs["guesses"]}
+    if guess in guessed_words:
+        return {"error": f"Already guessed '{guess}'."}
+    if guess == gs.get("opening_hint"):
+        return {"error": f"{guess} is a hint word."}
+    
     gs["step"] += 1
     guess_id = gs["word_idx"][guess]
     if guess_id == gs["target_id"]:
@@ -77,7 +87,8 @@ def process_guess(guess):
     gs["guesses"].append({"word": guess, "rank": rank, "step": gs["step"]})
     hint = None   
 
-    guessed_words = {g["word"] for g in gs["guesses"]}
+    guessed_words.add(guess) 
+
 
     if gs["step"] == 3:
         hw = get_hint_word(sims, gs["idx_word"], rank_target=10, exclude=guessed_words)
@@ -120,10 +131,39 @@ HTML = r"""<!DOCTYPE html>
        padding:2rem 1rem;overflow-x:hidden;}
   body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
     background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);}
-  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,6rem);
+
+  /* ── SCREENS ── */
+  .screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:540px;}
+  .screen.active{display:flex;}
+
+  /* ── SHARED TITLE ── */
+  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,6vw,3.2rem);
      letter-spacing:.2em;color:var(--accent);text-shadow:0 0 30px var(--accent),0 0 60px rgba(0,255,231,.3);
      margin-bottom:.25rem;}
   .subtitle{color:var(--dim);font-size:.75rem;letter-spacing:.4em;margin-bottom:2rem;}
+
+  /* ── MENU ── */
+  .rules-box{width:100%;border:1px solid var(--border);background:var(--panel);
+    padding:1.5rem;margin-bottom:2rem;}
+  .rules-box h2{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.2em;
+    color:var(--accent);margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;}
+  .rules-box ul{list-style:none;display:flex;flex-direction:column;gap:.65rem;}
+  .rules-box li{font-size:.82rem;line-height:1.6;color:var(--text);padding-left:1.2rem;position:relative;}
+  .rules-box li::before{content:'›';position:absolute;left:0;color:var(--accent);}
+  .rules-box .note{margin-top:1rem;padding:.6rem .8rem;border-left:3px solid var(--warn);
+    color:var(--warn);font-size:.78rem;line-height:1.6;}
+
+  /* ── PLAY BUTTON ── */
+  .play-btn{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.3em;
+    padding:.7rem 3rem;background:transparent;border:2px solid var(--accent);color:var(--accent);
+    cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+  .play-btn::after{content:'';position:absolute;inset:0;background:var(--accent);
+    transform:translateX(-105%);transition:transform .25s ease;}
+  .play-btn:hover::after{transform:translateX(0);}
+  .play-btn span{position:relative;z-index:1;transition:color .25s;}
+  .play-btn:hover span{color:var(--bg);}
+
+  /* ── GAME ── */
   .steps-bar{width:100%;max-width:540px;display:flex;gap:4px;margin-bottom:2rem;}
   .step-pip{flex:1;height:6px;background:var(--border);border-radius:2px;transition:background .3s;}
   .step-pip.done{background:var(--accent);}
@@ -154,39 +194,82 @@ HTML = r"""<!DOCTYPE html>
   .hint-box{width:100%;max-width:540px;margin-top:.5rem;padding:.6rem 1rem;
     background:#0d1117;border:1px dashed var(--warn);color:var(--warn);
     font-size:.8rem;letter-spacing:.05em;animation:slideIn .3s ease;}
-  .overlay{display:none;position:fixed;inset:0;background:rgba(6,10,15,.9);
-    align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:1rem;}
+
+  /* ── OVERLAY ── */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(6,10,15,.92);
+    align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:.75rem;
+    padding:1.5rem;}
   .overlay.show{display:flex;}
   .overlay h2{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.2em;}
   .overlay.won h2{color:var(--good);text-shadow:0 0 20px var(--good);}
   .overlay.lost h2{color:var(--warn);text-shadow:0 0 20px var(--warn);}
   .overlay p{color:var(--dim);font-size:.85rem;text-align:center;}
   .overlay .word-reveal{font-size:1.5rem;color:#fff;letter-spacing:.1em;}
+  #overlayGuesses{width:100%;max-width:380px;max-height:260px;overflow-y:auto;
+    flex-direction:column;gap:.3rem;display:none;}
+  #overlayGuesses .log-entry{animation:none;}
+
   @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
-<h1>Word Ascent</h1>
-<p class="subtitle">SEMANTIC WORD GUESSER</p>
-<div class="steps-bar" id="stepsBar"></div>
-<div class="input-row">
-  <input id="guessInput" type="text" placeholder="enter a word..." autocomplete="off" autocorrect="off" spellcheck="false"/>
-  <button id="submitBtn" onclick="submitGuess()">GUESS</button>
+
+<!-- ══════════ MENU SCREEN ══════════ -->
+<div class="screen active" id="menuScreen">
+  <h1>Word Ascent</h1>
+  <p class="subtitle">SEMANTIC WORD GUESSER</p>
+
+  <div class="rules-box">
+    <h2>How to Play</h2>
+    <ul>
+      <li>A secret target word has been chosen. Your goal is to guess it within <strong>10 attempts</strong>.</li>
+      <li>Every word in the vocabulary is ranked by how semantically similar it is to the target. The closer a word is in meaning, the lower its rank — rank <strong>#1</strong> means you found the target.</li>
+      <li>After each guess you receive a <strong>rank</strong> telling you how close you are. Use that signal to zero in on the target.</li>
+      <li>At steps 3, 6, and 9 you receive a <strong>hint</strong> — a word that is semantically very close to the target.</li>
+      <li>At the start of each game you also receive an <strong>opening hint</strong> to help you get your bearings.</li>
+    </ul>
+    <div class="note">
+      ⚠ All words are <strong>base forms only</strong> — no plurals, no "-ing", no "-ed". If your guess isn't in the vocabulary, you'll be told. When in doubt, go with the simplest root form of the word.
+    </div>
+  </div>
+
+  <button class="play-btn" onclick="startGame()"><span>PLAY</span></button>
 </div>
-<div id="feedback"></div>
-<div class="log" id="log"></div>
+
+<!-- ══════════ GAME SCREEN ══════════ -->
+<div class="screen" id="gameScreen">
+  <h1>Word Ascent</h1>
+  <p class="subtitle">SEMANTIC WORD GUESSER</p>
+  <div class="steps-bar" id="stepsBar"></div>
+  <div class="input-row">
+    <input id="guessInput" type="text" placeholder="enter a word..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <button id="submitBtn" onclick="submitGuess()">GUESS</button>
+  </div>
+  <div id="feedback"></div>
+  <div class="log" id="log"></div>
+</div>
+
+<!-- ══════════ OVERLAY ══════════ -->
 <div class="overlay" id="overlay">
   <h2 id="overlayTitle"></h2>
   <p id="overlayMsg"></p>
   <p class="word-reveal" id="overlayWord"></p>
-  <button onclick="location.reload()" style="margin-top:1rem">PLAY AGAIN</button>
+  <button onclick="startGame()" style="margin-top:.5rem">PLAY AGAIN</button>
+  <button id="viewGuessesBtn" onclick="toggleGuesses()">VIEW GUESSES</button>
+  <div id="overlayGuesses"></div>
 </div>
+
 <script>
 let MAX_STEPS = 10;
 let step = 0;
 
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
 function buildPips(){
-  const bar = document.getElementById('stepsBar');
+  const bar=document.getElementById('stepsBar');
   bar.innerHTML='';
   for(let i=0;i<MAX_STEPS;i++){
     const d=document.createElement('div');
@@ -196,13 +279,10 @@ function buildPips(){
   }
 }
 
-
 function updatePips(){
   for(let i=0;i<MAX_STEPS;i++){
     const p=document.getElementById('pip'+i);
-    if(i<step){
-      p.classList.add(i>=MAX_STEPS-4?'danger':'done');
-    }
+    if(i<step) p.classList.add(i>=MAX_STEPS-4?'danger':'done');
   }
 }
 
@@ -220,8 +300,8 @@ async function submitGuess(){
   inp.value='';
   document.getElementById('feedback').textContent='';
   document.getElementById('submitBtn').disabled=true;
-  const res = await fetch('/guess?word='+encodeURIComponent(word));
-  const data = await res.json();
+  const res=await fetch('/guess?word='+encodeURIComponent(word));
+  const data=await res.json();
   document.getElementById('submitBtn').disabled=false;
   inp.focus();
   if(data.error){
@@ -241,11 +321,8 @@ async function submitGuess(){
     h.textContent='💡 '+data.hint;
     log.prepend(h);
   }
-  if(data.won){
-    showOverlay(true,null,step);
-  } else if(data.lost){
-    showOverlay(false,data.target,step);
-  }
+  if(data.won) showOverlay(true,null,step);
+  else if(data.lost) showOverlay(false,data.target,step);
 }
 
 function showOverlay(won,target,steps){
@@ -256,28 +333,50 @@ function showOverlay(won,target,steps){
     ?`Solved in ${steps} step${steps>1?'s':''}!`
     :`The word was:`;
   document.getElementById('overlayWord').textContent=won?'':target;
+  // populate guesses from the live log
+  const box=document.getElementById('overlayGuesses');
+  box.innerHTML='';
+  const entries=[...document.querySelectorAll('#log .log-entry')];
+  [...entries].reverse().forEach(e=>{
+    const clone=e.cloneNode(true);
+    box.appendChild(clone);
+  });
+}
+
+function toggleGuesses(){
+  const box=document.getElementById('overlayGuesses');
+  const btn=document.getElementById('viewGuessesBtn');
+  const visible=box.style.display==='flex';
+  box.style.display=visible?'none':'flex';
+  btn.textContent=visible?'VIEW GUESSES':'HIDE GUESSES';
 }
 
 document.getElementById('guessInput').addEventListener('keydown',e=>{
   if(e.key==='Enter') submitGuess();
 });
 
-// Reset server state on every page load (handles "Play Again")
 async function startGame(){
-  const res = await fetch('/new');
-  const data = await res.json();
-  MAX_STEPS = data.max_steps;
+  document.getElementById('overlay').classList.remove('show','won','lost');
+  document.getElementById('overlayGuesses').style.display='none';
+  document.getElementById('viewGuessesBtn').textContent='VIEW GUESSES';
+  const res=await fetch('/new');
+  const data=await res.json();
+  MAX_STEPS=data.max_steps;
+  step=0;
+  document.getElementById('log').innerHTML='';
+  document.getElementById('feedback').textContent='';
   buildPips();
+  updatePips();
   if(data.hint){
-    const log = document.getElementById('log');
-    const h = document.createElement('div');
-    h.className = 'hint-box';
-    h.textContent = '💡 Starting hint: the word is semantically close to "' + data.hint + '"';
+    const log=document.getElementById('log');
+    const h=document.createElement('div');
+    h.className='hint-box';
+    h.textContent='💡 Starting hint: the word is semantically close to "'+data.hint+'"';
     log.appendChild(h);
   }
+  showScreen('gameScreen');
   document.getElementById('guessInput').focus();
 }
-startGame();
 </script>
 </body>
 </html>"""
