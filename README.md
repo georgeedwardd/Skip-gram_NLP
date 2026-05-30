@@ -130,7 +130,7 @@ This starts a local HTTP server on port `8765` and opens the game automatically 
 
 The model learns to predict surrounding context words from a given centre word. For a centre word $w_c$ and a true context word $w_o$, the objective maximises:
 
-$$\mathcal{L} = \log \sigma\!\left(u_{w_o}^\top v_{w_c}\right) + \sum_{i=1}^{k} \log \sigma\!\left(-u_{w_{n_i}}^\top v_{w_c}\right)$$
+$$\mathcal{L} = \log \sigma\left(u_{w_o}^\top v_{w_c}\right) + \sum_{i=1}^{k} \log \sigma\left(-u_{w_{n_i}}^\top v_{w_c}\right)$$
 
 where $k = 12$ negative samples are drawn per positive pair from the smoothed unigram distribution $P_n(w) \propto f(w)^{0.75}$.
 
