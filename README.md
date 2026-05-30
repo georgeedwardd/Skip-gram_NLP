@@ -110,9 +110,17 @@ From the project root, with artefacts present:
 
 ```bash
 python game/word_ascent.py
-```
+````
 
 This starts a local HTTP server on port `8765` and opens the game automatically in your default browser. If the browser does not open, navigate to `http://localhost:8765` manually.
+
+#### Gameplay preview
+
+<p align="center">
+  <img src="images/word_ascent_gameplay1.png" width="48%">
+  <img src="images/word_ascent_gameplay2.png" width="48%">
+</p>
+
 
 ---
 
@@ -155,6 +163,14 @@ After training, the raw vocabulary is reduced to canonical base forms by interse
 ---
 
 ## Results and Findings
+
+### t-SNE Plot
+
+A small random subset of words is selected from the vocabulary, and their corresponding embeddings are projected into two dimensions using t-SNE. Words that appear in similar contexts tend to form visible clusters, giving a rough indication of whether the model has captured meaningful structure.
+
+<p align="center">
+  <img src="images/t-sne_embeddings.png" width="600"/>
+</p>
 
 ### WordSim-353 Intrinsic Evaluation
 
