@@ -61,56 +61,6 @@ def init_game(W, word_idx, idx_word, max_steps=10, target=None):
     })
 
 
-# def process_guess(guess):
-#     gs = game_state
-#     if gs["status"] != "playing":
-#         return {"error": "Game over."}
-#     guess = guess.strip().lower()
-#     if guess not in gs["word_idx"]:
-#         return {"error": "Word not in vocabulary."}
-    
-#     guessed_words = {g["word"] for g in gs["guesses"]}
-#     if guess in guessed_words:
-#         return {"error": f"Already guessed '{guess}'."}
-#     if guess == gs.get("opening_hint"):
-#         return {"error": f"{guess} is a hint word."}
-    
-#     gs["step"] += 1
-#     guess_id = gs["word_idx"][guess]
-#     if guess_id == gs["target_id"]:
-#         gs["status"] = "won"
-#         gs["guesses"].append({"word": guess, "rank": 1, "step": gs["step"]})
-#         return {"rank": 1, "won": True}
-#     sims = np.dot(gs["W_norm"], gs["target_vec"])
-#     rank = int(np.sum(sims > sims[guess_id]) + 1)
-#     gs["guesses"].append({"word": guess, "rank": rank, "step": gs["step"]})
-#     hint = None   
-
-#     guessed_words.add(guess) 
-
-
-#     if gs["step"] == 3:
-#         hw = get_hint_word(sims, gs["idx_word"], rank_target=10, exclude=guessed_words)
-#         hint = f'Hint (step 3): a related word is "{hw}"'
-
-#     if gs["step"] == 6:
-#         hw = get_hint_word(sims, gs["idx_word"], rank_target=5, exclude=guessed_words)
-#         hint = f'Hint (step 6): a closer word is "{hw}"'
-
-#     if gs["step"] == 9:
-#         hw = get_hint_word(sims, gs["idx_word"], rank_target=2, exclude=guessed_words)
-#         hint = f'Hint (step 9): a very close word is "{hw}"'
-        
-#         gs["hints"].append(hint)                
-#     if gs["step"] >= gs["max_steps"]:
-#         gs["status"] = "lost"
-
-
-
-#     return {"rank": rank, "won": False, "hint": hint,
-#             "lost": gs["status"] == "lost",
-#             "target": gs["target"] if gs["status"] == "lost" else None}
-
 def process_guess(guess):
     gs = game_state
     if gs["status"] != "playing":
