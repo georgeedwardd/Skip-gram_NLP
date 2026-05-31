@@ -42,6 +42,10 @@ project/
 │   └── combined.csv                # WordSim-353 benchmark dataset (353 word pairs)
 ├── game/
 │   └── word_ascent.py              # Browser-based semantic word game
+├── images/
+│   ├── t-sne_embeddings.png        # 2D t-SNE visualisation of learned word embeddings
+│   ├── word_ascent_gameplay1.png   # Word Ascent gameplay screenshot
+│   └── word_ascent_gameplay2.png   # Word Ascent gameplay screenshot
 ├── notebooks/
 │   ├── 01_skipgram.ipynb           # Data preprocessing, model training, artefact export
 │   ├── 02_analysis.ipynb           # Evaluation, analogy probing, WordSim-353 benchmark
