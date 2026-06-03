@@ -215,14 +215,14 @@ Benchmarked against published corpus-based methods on WordSim-353 (Spearman's $\
 
 | Model | Type | Spearman's $\rho$ |
 |---|---|---|
-| C&W — Collobert & Weston (2008) | Corpus-based | 0.50 |
-| LSA — Landauer et al. (1997) | Corpus-based | 0.58 |
-| HSMN+csmRNN — Luong et al. (2013) | Corpus-based | 0.65 |
+| C&W - Collobert & Weston (2008) | Corpus-based | 0.50 |
+| LSA - Landauer et al. (1997) | Corpus-based | 0.58 |
+| HSMN+csmRNN - Luong et al. (2013) | Corpus-based | 0.65 |
 | **This project (SGNS, Text8, 256-d)** | **Corpus-based** | **0.6705** |
-| GloVe — Pennington et al. (2014) | Corpus-based | 0.706 |
-| Multi-prototype — Huang et al. (2012) | Corpus-based | 0.71 |
-| ESA — Gabrilovich & Markovitch (2007) | Corpus-based | 0.748 |
-| ConceptNet Numberbatch — Speer et al. (2017) | Hybrid | 0.828 |
+| GloVe - Pennington et al. (2014) | Corpus-based | 0.706 |
+| Multi-prototype - Huang et al. (2012) | Corpus-based | 0.71 |
+| ESA - Gabrilovich & Markovitch (2007) | Corpus-based | 0.748 |
+| ConceptNet Numberbatch - Speer et al. (2017) | Hybrid | 0.828 |
 
 > The result places this from-scratch NumPy implementation ahead of LSA, C&W, and the morphology-aware recursive neural network of Luong et al. (2013), and within ~0.035 of GloVe trained on much larger corpora. The gap relative to GloVe and higher models is expected: those systems use larger training corpora, higher-dimensional embeddings, or hybrid knowledge sources. The score is strong for a single-corpus, pure-NumPy SGNS implementation.
 ---
