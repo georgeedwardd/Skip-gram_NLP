@@ -227,21 +227,6 @@ Benchmarked against published corpus-based methods on WordSim-353 (Spearman's $\
 > The result places this from-scratch NumPy implementation ahead of LSA, C&W, and the morphology-aware recursive neural network of Luong et al. (2013), and within ~0.035 of GloVe trained on much larger corpora. The gap relative to GloVe and higher models is expected: those systems use larger training corpora, higher-dimensional embeddings, or hybrid knowledge sources. The score is strong for a single-corpus, pure-NumPy SGNS implementation.
 ---
 
-## Word Ascent — Semantic Word Game
-
-Word Ascent is a single-page browser game inspired by the game Contexto, deployed at **[skip-gram-nlp.streamlit.app](https://skip-gram-nlp.streamlit.app/)**. Every word in the filtered vocabulary is **ranked** by its cosine similarity to a secret target word. Players receive a rank after each guess and must use that signal to converge on the target within 10 attempts.
-
-**Game mechanics:**
-
-- The vocabulary is ordered by decreasing similarity to the target; rank 1 means the guess *is* the target.
-- An opening hint (the word at similarity rank 50) is provided at the start of each round.
-- Progressive hints are revealed at steps 3, 6, and 9, each drawing from increasingly close neighbours.
-- Only morphological base forms are valid guesses (e.g. `run`, not `running`).
-
-The game doubles as a qualitative probe of the embedding space: a well-structured vector space makes the rank signal informative and the game solvable; a poorly trained model produces erratic ranks that feel arbitrary to the player.
-
----
-
 ## Dataset Information
 
 ### Text8 Corpus (training)
@@ -268,10 +253,10 @@ The game doubles as a qualitative probe of the embedding space: a well-structure
 
 ## Future Improvements
 
-- **Evaluation coverage** — run against additional intrinsic benchmarks such as SimLex-999 or the Google Analogy Test Set for a more comprehensive picture of embedding quality.
-- **GloVe comparison** — implement GloVe (global co-occurrence matrix factorisation) alongside SGNS to compare representations on the same corpus and evaluation suite.
-- **Subword embeddings** — extend the vocabulary with fastText-style character n-gram representations to handle out-of-vocabulary words, which the current implementation cannot.
-- **Contextualised embeddings baseline** — compare the static SGNS vectors against a frozen BERT or similar model on WordSim-353 to quantify the cost of sense conflation.
+- **Evaluation coverage** - run against additional intrinsic benchmarks such as SimLex-999 or the Google Analogy Test Set for a more comprehensive picture of embedding quality.
+- **GloVe comparison** - implement GloVe (global co-occurrence matrix factorisation) alongside SGNS to compare representations on the same corpus and evaluation suite.
+- **Subword embeddings** - extend the vocabulary with fastText-style character n-gram representations to handle out-of-vocabulary words, which the current implementation cannot.
+- **Contextualised embeddings baseline** - compare the static SGNS vectors against a frozen BERT or similar model on WordSim-353 to quantify the cost of sense conflation.
 
 ---
 
