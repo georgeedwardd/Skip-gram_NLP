@@ -93,19 +93,19 @@ def process_guess(gs, guess):
     if gs["step"] == 3:
         hw = get_hint_word(sims, rank_target=10, exclude=guessed_words)
         gs["hints"].append(hw)
-        hint_msg = f'Hint (step 3): a related word is **"{hw}"**'
+        hint_msg = f'Hint (step 3): a related word is <strong>"{hw}"</strong>'
         gs["hint_msgs"].append(hint_msg)
 
     if gs["step"] == 6:
         hw = get_hint_word(sims, rank_target=5, exclude=guessed_words)
         gs["hints"].append(hw)
-        hint_msg = f'Hint (step 6): a closer word is **"{hw}"**'
+        hint_msg = f'Hint (step 6): a closer word is <strong>"{hw}"</strong>'
         gs["hint_msgs"].append(hint_msg)
 
     if gs["step"] == 9:
         hw = get_hint_word(sims, rank_target=2, exclude=guessed_words)
         gs["hints"].append(hw)
-        hint_msg = f'Hint (step 9): a very close word is **"{hw}"**'
+        hint_msg = f'Hint (step 9): a very close word is <strong>"{hw}"</strong>'
         gs["hint_msgs"].append(hint_msg)
 
     if gs["step"] >= MAX_STEPS:
