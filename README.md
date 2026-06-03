@@ -147,7 +147,7 @@ where $k = 12$ negative samples are drawn per positive pair from the smoothed un
 
 | Step | Detail |
 |---|---|
-| Corpus | Text8 — a cleaned Wikipedia extract of ~17 million tokens |
+| Corpus | Text8 - a cleaned Wikipedia extract of ~17 million tokens |
 | Minimum frequency | Words appearing fewer than 5 times are discarded |
 | Subsampling | Frequent words are probabilistically discarded using the Word2Vec formula |
 | Window size | ±5 tokens (symmetric context window) |
