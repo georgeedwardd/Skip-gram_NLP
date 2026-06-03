@@ -114,7 +114,7 @@ Open and run `notebooks/02_analysis.ipynb`. It will use the full embeddings if t
 
 ### Playing Word Ascent
 
-Word Ascent is deployed as a Streamlit web application and can be played directly in the browser at **[skip-gram-nlp.streamlit.app](https://skip-gram-nlp.streamlit.app/)** — no local installation required.
+Word Ascent is deployed as a Streamlit web application and can be played directly in the browser at **[skip-gram-nlp.streamlit.app](https://skip-gram-nlp.streamlit.app/)** - no local installation required.
 
 To run the application locally, install the application dependencies and launch it from the project root:
 
