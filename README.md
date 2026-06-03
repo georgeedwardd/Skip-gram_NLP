@@ -21,13 +21,13 @@ The trained embeddings are evaluated both qualitatively (nearest-neighbour queri
 
 ## Key Features
 
-- **Pure NumPy training** — no PyTorch or TensorFlow; every forward pass and gradient update is written explicitly, making the mathematics transparent and auditable.
-- **Negative Sampling** — efficient approximation of the full softmax objective using a smoothed unigram distribution ($f(w)^{0.75}$), consistent with the original paper.
-- **Subsampling of frequent words** — probabilistic discard of high-frequency tokens during data preparation to improve downstream embedding quality.
-- **WordNet vocabulary filtering** — post-training, the embedding matrix is reduced to morphological base forms validated against WordNet, ensuring clean downstream evaluation.
-- **WordSim-353 benchmark** — Spearman and Pearson correlation against 353 human-annotated word pairs as a rigorous intrinsic evaluation.
-- **Vector analogy probing** — structured qualitative tests across gender, profession, and comparative categories.
-- **Word Ascent game** — a browser-based semantic guessing game (inspired by Contexto) deployed as a [Streamlit](https://skip-gram-nlp.streamlit.app/) web application.
+- **Pure NumPy training** - no PyTorch or TensorFlow; every forward pass and gradient update is written explicitly, making the mathematics transparent and auditable.
+- **Negative Sampling** - efficient approximation of the full softmax objective using a smoothed unigram distribution ($f(w)^{0.75}$), consistent with the original paper.
+- **Subsampling of frequent words** - probabilistic discard of high-frequency tokens during data preparation to improve downstream embedding quality.
+- **WordNet vocabulary filtering** - post-training, the embedding matrix is reduced to morphological base forms validated against WordNet, ensuring clean downstream evaluation.
+- **WordSim-353 benchmark** - Spearman and Pearson correlation against 353 human-annotated word pairs as a rigorous intrinsic evaluation.
+- **Vector analogy probing** - structured qualitative tests across gender, profession, and comparative categories.
+- **Word Ascent game** - a browser-based semantic guessing game (inspired by Contexto) deployed as a [Streamlit](https://skip-gram-nlp.streamlit.app/) web application.
 
 ---
 
