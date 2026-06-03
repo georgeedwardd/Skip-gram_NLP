@@ -4,9 +4,10 @@
 ![NumPy](https://img.shields.io/badge/NumPy-2.4-013243?style=flat-square&logo=numpy&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-Notebooks-F37626?style=flat-square&logo=jupyter&logoColor=white)
 ![NLTK](https://img.shields.io/badge/NLTK-3.9-4B9CD3?style=flat-square)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.58-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-A complete, ground-up implementation of the **Skip-Gram Word2Vec** model with Negative Sampling (SGNS), trained on the Text8 corpus. The project covers the full pipeline from raw text preprocessing and mini-batch gradient descent training, through intrinsic evaluation on the WordSim-353 benchmark, to a browser-based semantic word game powered by the trained embeddings.
+A complete, ground-up implementation of the **Skip-Gram Word2Vec** model with Negative Sampling (SGNS), trained on the Text8 corpus. The project covers the full pipeline from raw text preprocessing and mini-batch gradient descent training, through intrinsic evaluation on the WordSim-353 benchmark, to a web-based semantic word game powered by the trained embeddings.
 
 ---
 
@@ -14,7 +15,7 @@ A complete, ground-up implementation of the **Skip-Gram Word2Vec** model with Ne
 
 Word embeddings encode semantic meaning as dense vectors in a continuous space, enabling geometric reasoning over language. This project reimplements the original Mikolov et al. (2013) Skip-Gram architecture entirely in NumPy to expose the underlying mathematics clearly.
 
-The trained embeddings are evaluated both qualitatively (nearest-neighbour queries, vector analogy probing, t-SNE visualisation) and quantitatively (Spearman rank correlation against human similarity judgements on WordSim-353). A standalone browser game, **Word Ascent**, ships the resulting embeddings as a playable semantic guessing experience.
+The trained embeddings are evaluated both qualitatively (nearest-neighbour queries, vector analogy probing, t-SNE visualisation) and quantitatively (Spearman rank correlation against human similarity judgements on WordSim-353). A Streamlit web application, **Word Ascent**, ships the resulting embeddings as a playable semantic guessing experience.
 
 ---
 
@@ -26,7 +27,7 @@ The trained embeddings are evaluated both qualitatively (nearest-neighbour queri
 - **WordNet vocabulary filtering** — post-training, the embedding matrix is reduced to morphological base forms validated against WordNet, ensuring clean downstream evaluation.
 - **WordSim-353 benchmark** — Spearman and Pearson correlation against 353 human-annotated word pairs as a rigorous intrinsic evaluation.
 - **Vector analogy probing** — structured qualitative tests across gender, profession, and comparative categories.
-- **Word Ascent game** — a browser-based semantic guessing game (inspired by Contexto) that serves the trained embeddings via a lightweight local HTTP server.
+- **Word Ascent game** — a browser-based semantic guessing game (inspired by Contexto) deployed as a [Streamlit](https://skip-gram-nlp.streamlit.app/) web application.
 
 ---
 
@@ -34,14 +35,17 @@ The trained embeddings are evaluated both qualitatively (nearest-neighbour queri
 
 ```
 project/
+├── application/
+│   ├── .streamlit/
+│   │   └── config.toml             # Streamlit configuration
+│   ├── app.py                      # Word Ascent Streamlit application
+│   └── requirements.txt            # Application-specific dependencies
 ├── artefacts/
 │   ├── filtered_embeddings.npz     # Trained embedding matrix (24 270 × 256, float32)
 │   ├── filtered_word_idx.json      # word → index mapping (WordNet-filtered vocabulary)
 │   └── filtered_idx_word.json      # index → word mapping (WordNet-filtered vocabulary)
 ├── data/
 │   └── combined.csv                # WordSim-353 benchmark dataset (353 word pairs)
-├── game/
-│   └── word_ascent.py              # Browser-based semantic word game
 ├── images/
 │   ├── t-sne_embeddings.png        # 2D t-SNE visualisation of learned word embeddings
 │   ├── word_ascent_gameplay1.png   # Word Ascent gameplay screenshot
@@ -66,7 +70,7 @@ project/
 | Dimensionality reduction | scikit-learn 1.8 | t-SNE projection of the embedding space |
 | Statistical evaluation | SciPy 1.17 | Pearson and Spearman correlation computation |
 | Progress tracking | tqdm 4.67 | Training progress bars |
-| Game server | Python `http.server` (stdlib) | Local HTTP server for the Word Ascent game |
+| Game application | Streamlit 1.58 | Web application for the Word Ascent game |
 | Notebooks | Jupyter / ipykernel | Interactive development and documentation |
 
 ---
@@ -110,13 +114,14 @@ Open and run `notebooks/02_analysis.ipynb`. It will use the full embeddings if t
 
 ### Playing Word Ascent
 
-From the project root, with artefacts present:
+Word Ascent is deployed as a Streamlit web application and can be played directly in the browser at **[skip-gram-nlp.streamlit.app](https://skip-gram-nlp.streamlit.app/)** — no local installation required.
+
+To run the application locally, install the application dependencies and launch it from the project root:
 
 ```bash
-python game/word_ascent.py
-````
-
-This starts a local HTTP server on port `8765` and opens the game automatically in your default browser. If the browser does not open, navigate to `http://localhost:8765` manually.
+pip install -r application/requirements.txt
+streamlit run application/app.py
+```
 
 #### Gameplay preview
 
@@ -224,7 +229,7 @@ Benchmarked against published corpus-based methods on WordSim-353 (Spearman's $\
 
 ## Word Ascent — Semantic Word Game
 
-Word Ascent is a single-page browser game inspired by the game Contexto. Every word in the filtered vocabulary is **ranked** by its cosine similarity to a secret target word. Players receive a rank after each guess and must use that signal to converge on the target within 10 attempts.
+Word Ascent is a single-page browser game inspired by the game Contexto, deployed at **[skip-gram-nlp.streamlit.app](https://skip-gram-nlp.streamlit.app/)**. Every word in the filtered vocabulary is **ranked** by its cosine similarity to a secret target word. Players receive a rank after each guess and must use that signal to converge on the target within 10 attempts.
 
 **Game mechanics:**
 
@@ -232,7 +237,6 @@ Word Ascent is a single-page browser game inspired by the game Contexto. Every w
 - An opening hint (the word at similarity rank 50) is provided at the start of each round.
 - Progressive hints are revealed at steps 3, 6, and 9, each drawing from increasingly close neighbours.
 - Only morphological base forms are valid guesses (e.g. `run`, not `running`).
-- The UI is served by a stdlib `http.server` (no external web framework required).
 
 The game doubles as a qualitative probe of the embedding space: a well-structured vector space makes the rank signal informative and the game solvable; a poorly trained model produces erratic ranks that feel arbitrary to the player.
 
