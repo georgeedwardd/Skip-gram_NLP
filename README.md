@@ -1,4 +1,4 @@
-# Word2Vec from Scratch — Skip-Gram with Negative Sampling
+# Word2Vec from Scratch - Skip-Gram with Negative Sampling
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-2.4-013243?style=flat-square&logo=numpy&logoColor=white)
